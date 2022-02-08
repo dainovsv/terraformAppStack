@@ -71,7 +71,7 @@ resource "aws_autoscaling_group" "SimpleZFSAutoSaclingGroup" {
 #   metadata_options {
 #     http_endpoint               = "enabled"
 #     http_put_response_hop_limit = "1"
-#     http_tokens                 = "optional"
+#     http_tokens                 = "optional"cd
 #     instance_metadata_tags      = "disabled"
 #   }
 
@@ -217,7 +217,7 @@ resource "aws_lb_target_group" "ALB_ZFS_TARGET_GROUP" {
   }
 }
 
-#resource "aws_lb_target_group_attachment" "ALB_ZFS_TARGET_GROUP_ATTACHMENT" {
+#resource "" "ALB_ZFS_TARGET_GROUP_ATTACHMENT" {
 # target_group_arn = "arn:aws:elasticloadbalancing:eu-west-2:135727629848:targetgroup/SimpleZFSAutoSaclingGroup-1/1acf0b00b99ad043"
 #  target_id        = "i-06fd78260f33107f5"
 #}
@@ -259,17 +259,17 @@ resource "aws_network_acl" "ZFS_ACL" {
   }
 }
 
-# resource "aws_network_interface" "ALB_ENI_1" {
-#   description = "ELB app/SimpleZFSAutoSaclingGroup-1/3f1c9137a6b527fa"
-#   #interface_type     = "interface"
-#   ipv4_prefix_count  = "0"
-#   ipv6_address_count = "0"
-#   ipv6_prefix_count  = "0"
-#   private_ip         = "172.31.11.50"
-#   security_groups    = ["sg-022db4c5d1be35080"]
-#   source_dest_check  = "true"
-#   subnet_id          = data.terraform_remote_state.local.outputs.aws_subnet_SUBNET1_id
-# }
+resource "aws_network_interface" "ALB_ENI_1" {
+  description = "ELB app/SimpleZFSAutoSaclingGroup-1/3f1c9137a6b527fa"
+  #interface_type     = "interface"
+  ipv4_prefix_count  = "0"
+  ipv6_address_count = "0"
+  ipv6_prefix_count  = "0"
+  private_ip         = "172.31.11.50"
+  security_groups            = [aws_security_group.LAUCH_WIZARD_ZFS.id]
+  source_dest_check  = "true"
+  subnet_id          = aws_subnet.SUBNET1.id
+}
 
 # resource "aws_network_interface" "RED_ENI" {
 #   description = "RDSNetworkInterface"
@@ -278,39 +278,38 @@ resource "aws_network_acl" "ZFS_ACL" {
 #   ipv6_address_count = "0"
 #   ipv6_prefix_count  = "0"
 #   private_ip         = "172.31.46.43"
-#   security_groups    = ["sg-2da0c051"]
+#   security_groups    = [aws_security_group.LAUCH_WIZARD_ZFS.id]
 #   source_dest_check  = "true"
 #   subnet_id          = data.terraform_remote_state.local.outputs.aws_subnet_SUBNET1_id
 # }
 
-# resource "aws_network_interface" "ALB_ENI_2" {
-#   attachment {
-#     device_index = "0"
-#     instance     = "i-06fd78260f33107f5"
-#   }
+resource "aws_network_interface" "ALB_ENI_2" {
+  # attachment {
+  #   device_index = "0"
+  #   instance     = "i-06fd78260f33107f5"
+  # }
 
-#   #interface_type     = "interface"
-#   ipv4_prefix_count  = "0"
-#   ipv6_address_count = "0"
-#   ipv6_prefix_count  = "0"
-#   private_ip         = "172.31.22.43"
-#   private_ip_list    = ["172.31.22.43"]
-#   security_groups    = ["sg-022db4c5d1be35080"]
-#   source_dest_check  = "true"
-#   subnet_id          = data.terraform_remote_state.local.outputs.aws_subnet_SUBNET2_id
-# }
+  #interface_type     = "interface"
+  ipv4_prefix_count  = "0"
+  ipv6_address_count = "0"
+  ipv6_prefix_count  = "0"
+  private_ip         = "172.31.22.43"
+  security_groups            = [aws_security_group.LAUCH_WIZARD_ZFS.id]
+  source_dest_check  = "true"
+  subnet_id          = aws_subnet.SUBNET2.id
+}
 
-# resource "aws_network_interface" "ALB_ENI_3" {
-#   description = "ELB app/SimpleZFSAutoSaclingGroup-1/3f1c9137a6b527fa"
-#   #interface_type     = "interface"
-#   ipv4_prefix_count  = "0"
-#   ipv6_address_count = "0"
-#   ipv6_prefix_count  = "0"
-#   private_ip         = "172.31.28.119"
-#   security_groups    = ["sg-022db4c5d1be35080"]
-#   source_dest_check  = "true"
-#   subnet_id          = data.terraform_remote_state.local.outputs.aws_subnet_SUBNET3_id
-# }
+resource "aws_network_interface" "ALB_ENI_3" {
+  description = "ELB app/SimpleZFSAutoSaclingGroup-1/3f1c9137a6b527fa"
+  #interface_type     = "interface"
+  ipv4_prefix_count  = "0"
+  ipv6_address_count = "0"
+  ipv6_prefix_count  = "0"
+  private_ip         = "172.31.28.119"
+  security_groups            = [aws_security_group.LAUCH_WIZARD_ZFS.id]
+  source_dest_check  = "true"
+  subnet_id          = aws_subnet.SUBNET3.id
+}
 
 
 resource "aws_route_table" "ROUTE_TABLE_ZFS" {
