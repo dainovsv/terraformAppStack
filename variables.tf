@@ -1,10 +1,3 @@
-data "terraform_remote_state" "local" {
-  backend = "local"
-
-  config = {
-    path = "terraform.tfstate"
-  }
-}
 
 variable "image_id" {
   type        = string
