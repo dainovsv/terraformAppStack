@@ -1,5 +1,5 @@
 resource "aws_autoscaling_group" "SimpleZFSAutoSaclingGroup" {
-  availability_zones        = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+  #availability_zones        = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
   capacity_rebalance        = "false"
   default_cooldown          = "300"
   desired_capacity          = "1"
@@ -9,7 +9,7 @@ resource "aws_autoscaling_group" "SimpleZFSAutoSaclingGroup" {
 
   launch_template {
     id      = aws_launch_template.ZFSSimpleAppTemplate.id
-    version = "$Default"
+    version = "$Latest"
   }
 
   max_instance_lifetime   = "0"
@@ -18,8 +18,8 @@ resource "aws_autoscaling_group" "SimpleZFSAutoSaclingGroup" {
   min_size                = "1"
   name                    = "SimpleZFSAutoSaclingGroup"
   protect_from_scale_in   = "false"
-  #target_group_arns         = ["arn:aws:elasticloadbalancing:eu-west-2:135727629848:targetgroup/SimpleZFSAutoSaclingGroup-1/1acf0b00b99ad043"]
-  #vpc_zone_identifier       = [aws_subnet.SUBNET2.id, aws_subnet.SUBNET1.id, aws_subnet.SUBNET3.id]
+  target_group_arns         = [aws_lb_target_group.ALB_ZFS_TARGET_GROUP.arn]
+  vpc_zone_identifier       = [aws_subnet.SUBNET1.id]
   wait_for_capacity_timeout = "10m"
 
 }
@@ -102,7 +102,7 @@ resource "aws_launch_template" "ZFSSimpleAppTemplate" {
   instance_type           = "t2.small"
   key_name                = "zfs"
   name                    = "ZFSSimpleAppTemplate"
-  vpc_security_group_ids  = [aws_security_group.LAUCH_WIZARD_ZFS.id]
+  security_group_names  = [aws_security_group.LAUCH_WIZARD_ZFS.name]
 
    capacity_reservation_specification {
     capacity_reservation_preference = "open"
@@ -120,14 +120,6 @@ resource "aws_launch_template" "ZFSSimpleAppTemplate" {
   disable_api_termination = true
 
   ebs_optimized = true
-
-  elastic_gpu_specifications {
-    type = "test"
-  }
-
-  elastic_inference_accelerator {
-    type = "eia1.medium"
-  }
 
   metadata_options {
     http_endpoint               = "enabled"
@@ -148,14 +140,9 @@ resource "aws_launch_template" "ZFSSimpleAppTemplate" {
   #  availability_zone = "us-west-2a"
   #}
 
-
-  kernel_id = "test"
-
-  ram_disk_id = "test"
-
   instance_initiated_shutdown_behavior = "terminate"
 
-  user_data = filebase64("${path.module}/example.sh")
+  
 }
 
 resource "aws_lb" "ALB_ZFS" {
