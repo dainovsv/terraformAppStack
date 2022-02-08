@@ -9,7 +9,6 @@ resource "aws_autoscaling_group" "SimpleZFSAutoSaclingGroup" {
 
   launch_template {
     id      = aws_launch_template.ZFSSimpleAppTemplate.id
-    name    = "ZFSSimpleAppTemplate"
     version = "$Default"
   }
 
@@ -22,6 +21,10 @@ resource "aws_autoscaling_group" "SimpleZFSAutoSaclingGroup" {
   #target_group_arns         = ["arn:aws:elasticloadbalancing:eu-west-2:135727629848:targetgroup/SimpleZFSAutoSaclingGroup-1/1acf0b00b99ad043"]
   #vpc_zone_identifier       = [aws_subnet.SUBNET2.id, aws_subnet.SUBNET1.id, aws_subnet.SUBNET3.id]
   wait_for_capacity_timeout = "10m"
+
+  tags = {
+    Terraform = "Yes"
+  }
 }
 
 
@@ -132,6 +135,10 @@ resource "aws_lb" "ALB_ZFS" {
   }
 
   subnets = [aws_subnet.SUBNET1.id, aws_subnet.SUBNET1.id, aws_subnet.SUBNET3.id]
+
+  tags = {
+    Terraform = "Yes"
+  }
 }
 
 resource "aws_lb_listener" "ALB_ZFS_LISTENER" {
@@ -143,9 +150,13 @@ resource "aws_lb_listener" "ALB_ZFS_LISTENER" {
   load_balancer_arn = aws_lb.ALB_ZFS.arn
   port              = "80"
   protocol          = "HTTP"
+
+  tags = {
+    Terraform = "Yes"
+  }
 }
 
-resource "" {
+resource "aws_lb_target_group" "ALB_ZFS_TARGET_GROUP" {
   deregistration_delay = "300"
 
   health_check {
@@ -175,6 +186,10 @@ resource "" {
 
   target_type = "instance"
   vpc_id      = aws_vpc.VPC_ZFS.id
+
+  tags = {
+    Terraform = "Yes"
+  }
 }
 
 #resource "aws_lb_target_group_attachment" "ALB_ZFS_TARGET_GROUP_ATTACHMENT" {
@@ -212,6 +227,11 @@ resource "aws_network_acl" "ZFS_ACL" {
 
   subnet_ids = [aws_subnet.SUBNET2.id, aws_subnet.SUBNET3.id, aws_subnet.SUBNET1.id]
   vpc_id     = aws_vpc.VPC_ZFS.id
+
+
+  tags = {
+    Terraform = "Yes"
+  }
 }
 
 # resource "aws_network_interface" "ALB_ENI_1" {
@@ -275,6 +295,10 @@ resource "aws_route_table" "ROUTE_TABLE_ZFS" {
   }
 
   vpc_id = aws_vpc.VPC_ZFS.id
+
+  tags = {
+    Terraform = "Yes"
+  }
 }
 
 
@@ -323,12 +347,16 @@ resource "aws_security_group" "LAUCH_WIZARD_ZFS" {
 
   name   = "launch-wizard-2"
   vpc_id = aws_vpc.VPC_ZFS.id
+
+  tags = {
+    Terraform = "Yes"
+  }
 }
 
 
 resource "aws_subnet" "SUBNET1" {
   assign_ipv6_address_on_creation                = "false"
-  cidr_block                                     = "10.0.1.0/16"
+  cidr_block                                     = "172.31.16.0/20"
   enable_dns64                                   = "false"
   enable_resource_name_dns_a_record_on_launch    = "false"
   enable_resource_name_dns_aaaa_record_on_launch = "false"
@@ -337,11 +365,15 @@ resource "aws_subnet" "SUBNET1" {
   map_public_ip_on_launch             = "true"
   private_dns_hostname_type_on_launch = "ip-name"
   vpc_id                              = aws_vpc.VPC_ZFS.id
+
+  tags = {
+    Terraform = "Yes"
+  }
 }
 
 resource "aws_subnet" "SUBNET2" {
   assign_ipv6_address_on_creation                = "false"
-  cidr_block                                     = "10.0.2.0/16"
+  cidr_block                                     = "172.31.32.0/20"
   enable_dns64                                   = "false"
   enable_resource_name_dns_a_record_on_launch    = "false"
   enable_resource_name_dns_aaaa_record_on_launch = "false"
@@ -350,11 +382,15 @@ resource "aws_subnet" "SUBNET2" {
   map_public_ip_on_launch             = "true"
   private_dns_hostname_type_on_launch = "ip-name"
   vpc_id                              = aws_vpc.VPC_ZFS.id
+
+  tags = {
+    Terraform = "Yes"
+  }
 }
 
 resource "aws_subnet" "SUBNET3" {
   assign_ipv6_address_on_creation                = "false"
-  cidr_block                                     = "10.0.3.0/16"
+  cidr_block                                     = "172.31.0.0/20"
   enable_dns64                                   = "false"
   enable_resource_name_dns_a_record_on_launch    = "false"
   enable_resource_name_dns_aaaa_record_on_launch = "false"
@@ -363,15 +399,23 @@ resource "aws_subnet" "SUBNET3" {
   map_public_ip_on_launch             = "true"
   private_dns_hostname_type_on_launch = "ip-name"
   vpc_id                              = aws_vpc.VPC_ZFS.id
+
+  tags = {
+    Terraform = "Yes"
+  }
 }
 
 resource "aws_vpc" "VPC_ZFS" {
   assign_generated_ipv6_cidr_block = "false"
-  cidr_block                       = "10.0.0.0/16"
+  cidr_block                       = "172.31.0.0/16"
   enable_classiclink               = "false"
   enable_classiclink_dns_support   = "false"
   enable_dns_hostnames             = "true"
   enable_dns_support               = "true"
   instance_tenancy                 = "default"
   #ipv6_netmask_length              = "0"
+
+  tags = {
+    Terraform = "Yes"
+  }
 }
