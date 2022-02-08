@@ -22,9 +22,6 @@ resource "aws_autoscaling_group" "SimpleZFSAutoSaclingGroup" {
   #vpc_zone_identifier       = [aws_subnet.SUBNET2.id, aws_subnet.SUBNET1.id, aws_subnet.SUBNET3.id]
   wait_for_capacity_timeout = "10m"
 
-  tags = {
-    Terraform = "Yes"
-  }
 }
 
 
@@ -101,12 +98,64 @@ resource "aws_internet_gateway" "IGW_ZFS" {
 
 resource "aws_launch_template" "ZFSSimpleAppTemplate" {
   default_version         = "1"
-  disable_api_termination = "false"
   image_id                = var.image_id
   instance_type           = "t2.small"
   key_name                = "zfs"
   name                    = "ZFSSimpleAppTemplate"
   vpc_security_group_ids  = [aws_security_group.LAUCH_WIZARD_ZFS.id]
+
+   capacity_reservation_specification {
+    capacity_reservation_preference = "open"
+  }
+
+  cpu_options {
+    core_count       = 4
+    threads_per_core = 2
+  }
+
+  credit_specification {
+    cpu_credits = "standard"
+  }
+
+  disable_api_termination = true
+
+  ebs_optimized = true
+
+  elastic_gpu_specifications {
+    type = "test"
+  }
+
+  elastic_inference_accelerator {
+    type = "eia1.medium"
+  }
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+    instance_metadata_tags      = "enabled"
+  }
+
+  monitoring {
+    enabled = true
+  }
+
+  network_interfaces {
+    associate_public_ip_address = true
+  }
+
+  #placement {
+  #  availability_zone = "us-west-2a"
+  #}
+
+
+  kernel_id = "test"
+
+  ram_disk_id = "test"
+
+  instance_initiated_shutdown_behavior = "terminate"
+
+  user_data = filebase64("${path.module}/example.sh")
 }
 
 resource "aws_lb" "ALB_ZFS" {
@@ -122,19 +171,8 @@ resource "aws_lb" "ALB_ZFS" {
   name                       = "SimpleZFSAutoSaclingGroup-1"
   security_groups            = [aws_security_group.LAUCH_WIZARD_ZFS.id]
 
-  subnet_mapping {
-    subnet_id = aws_subnet.SUBNET1.id
-  }
 
-  subnet_mapping {
-    subnet_id = aws_subnet.SUBNET1.id
-  }
-
-  subnet_mapping {
-    subnet_id = aws_subnet.SUBNET3.id
-  }
-
-  subnets = [aws_subnet.SUBNET1.id, aws_subnet.SUBNET1.id, aws_subnet.SUBNET3.id]
+  subnets = [aws_subnet.SUBNET1.id]
 
   tags = {
     Terraform = "Yes"
