@@ -19,7 +19,7 @@ resource "aws_autoscaling_group" "SimpleZFSAutoSaclingGroup" {
   name                    = "SimpleZFSAutoSaclingGroup"
   protect_from_scale_in   = "false"
   target_group_arns         = [aws_lb_target_group.ALB_ZFS_TARGET_GROUP.arn]
-  vpc_zone_identifier       = [aws_subnet.SUBNET1.id]
+  vpc_zone_identifier       = [aws_subnet.SUBNET1.id,aws_subnet.SUBNET2.id]
   wait_for_capacity_timeout = "10m"
 
 }
@@ -159,7 +159,7 @@ resource "aws_lb" "ALB_ZFS" {
   security_groups            = [aws_security_group.LAUCH_WIZARD_ZFS.id]
 
 
-  subnets = [aws_subnet.SUBNET1.id]
+  subnets = [aws_subnet.SUBNET1.id, aws_subnet.SUBNET2.id]
 
   tags = {
     Terraform = "Yes"
@@ -383,6 +383,7 @@ resource "aws_subnet" "SUBNET1" {
   assign_ipv6_address_on_creation                = "false"
   cidr_block                                     = "172.31.16.0/20"
   enable_dns64                                   = "false"
+  availability_zone                              = "eu-central-1a"
   enable_resource_name_dns_a_record_on_launch    = "false"
   enable_resource_name_dns_aaaa_record_on_launch = "false"
   ipv6_native                                    = "false"
@@ -399,6 +400,7 @@ resource "aws_subnet" "SUBNET1" {
 resource "aws_subnet" "SUBNET2" {
   assign_ipv6_address_on_creation                = "false"
   cidr_block                                     = "172.31.32.0/20"
+  availability_zone                              = "eu-central-1b"
   enable_dns64                                   = "false"
   enable_resource_name_dns_a_record_on_launch    = "false"
   enable_resource_name_dns_aaaa_record_on_launch = "false"
@@ -416,6 +418,7 @@ resource "aws_subnet" "SUBNET2" {
 resource "aws_subnet" "SUBNET3" {
   assign_ipv6_address_on_creation                = "false"
   cidr_block                                     = "172.31.0.0/20"
+  availability_zone                              = "eu-central-1c"
   enable_dns64                                   = "false"
   enable_resource_name_dns_a_record_on_launch    = "false"
   enable_resource_name_dns_aaaa_record_on_launch = "false"
