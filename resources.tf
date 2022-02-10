@@ -397,7 +397,7 @@ resource "aws_security_group" "LAUCH_WIZARD_ZFS" {
 }
 
 resource "aws_security_group" "LAUCH_WIZARD_ZFS_DB" {
-  description = "launch-wizard-2"
+  description = "launch-wizard-db"
 
   egress {
     cidr_blocks = ["0.0.0.0/0"]
@@ -423,7 +423,7 @@ resource "aws_security_group" "LAUCH_WIZARD_ZFS_DB" {
     to_port     = "1433"
   }
 
-  name   = "launch-wizard-2"
+  name   = "launch-wizard-db"
   vpc_id = aws_vpc.VPC_ZFS.id
 
   tags = {
