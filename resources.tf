@@ -1,5 +1,4 @@
 resource "aws_autoscaling_group" "SimpleZFSAutoSaclingGroup" {
-  #availability_zones        = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
   capacity_rebalance        = "false"
   default_cooldown          = "300"
   desired_capacity          = "1"
@@ -25,12 +24,15 @@ resource "aws_autoscaling_group" "SimpleZFSAutoSaclingGroup" {
 }
 
 
-# resource "aws_db_subnet_group" "RDS_SUBNET_GROUP" {
-#   description = "Created from the RDS Management Console"
-#   name        = "default-vpc-03200b6b"
-#   subnet_ids  = [aws_subnet.SUBNET2.id, aws_subnet.SUBNET3.id, aws_subnet.SUBNET1.id]
-# }
-
+resource "aws_db_instance" "ZFS_DB" {
+  allocated_storage    = 10
+  engine               = "mysql"
+  instance_class       = "db.t3.small"
+  name                 = "ZFSPOCDB"
+  username             = "admin"
+  password             = var.database_password
+  skip_final_snapshot  = true
+}
 
 
 # resource "aws_instance" "ZFS_WEB_SERVER" {
@@ -102,16 +104,14 @@ resource "aws_launch_configuration" "ZFS_LAUNCH_CONFIGURATION" {
     instance_type = "t2.small"
     security_groups = [aws_security_group.LAUCH_WIZARD_ZFS.id]
     key_name = "zfs"
-#   iam_instance_profile = "ec2-profile"
-#     user_data = <<EOF
-#         <powershell>
-#         Will need to put comaand in here to set DB enviorment variable
-#         </powershell>
-#         <persist>true</persist>
-# EOF
-    # lifecycle {
-    #     create_before_destroy = true
-    # }
+    user_data = <<EOF
+         <script>
+           echo Current date and time >> %SystemRoot%\Temp\test.log
+           echo %DATE% %TIME% >> %SystemRoot%\Temp\test.log
+           json -I -f %SystemRoot%/../inetpub/wwwroot/ZFSsampleApp/appsettings.json -e "this.ConnectionStrings.DefaultConnection='Server=${aws_db_instance.ZFS_DB.endpoint};Database=aspnet-ZFSWebAppPOC-8A6458F2-6992-47F2-9B57-CE6120E89588;User Id=admin;Password=${var.database_password};'"
+           </script>
+         <persist>true</persist>
+    EOF
 }
 
 
@@ -236,11 +236,6 @@ resource "aws_lb_target_group" "ALB_ZFS_TARGET_GROUP" {
   }
 }
 
-#resource "" "ALB_ZFS_TARGET_GROUP_ATTACHMENT" {
-# target_group_arn = "arn:aws:elasticloadbalancing:eu-west-2:135727629848:targetgroup/SimpleZFSAutoSaclingGroup-1/1acf0b00b99ad043"
-#  target_id        = "i-06fd78260f33107f5"
-#}
-
 resource "aws_main_route_table_association" "VPC_ZFS" {
   route_table_id = aws_route_table.ROUTE_TABLE_ZFS.id
   vpc_id         = aws_vpc.VPC_ZFS.id
@@ -280,7 +275,6 @@ resource "aws_network_acl" "ZFS_ACL" {
 
 resource "aws_network_interface" "ALB_ENI_1" {
   description = "ELB app/SimpleZFSAutoSaclingGroup-1/3f1c9137a6b527fa"
-  #interface_type     = "interface"
   ipv4_prefix_count  = "0"
   ipv6_address_count = "0"
   ipv6_prefix_count  = "0"
@@ -290,7 +284,7 @@ resource "aws_network_interface" "ALB_ENI_1" {
   subnet_id          = aws_subnet.SUBNET1.id
 }
 
-# resource "aws_network_interface" "RED_ENI" {
+# resource "aws_network_interface" "RDS_ENI" {
 #   description = "RDSNetworkInterface"
 #   #interface_type     = "interface"
 #   ipv4_prefix_count  = "0"
@@ -303,12 +297,6 @@ resource "aws_network_interface" "ALB_ENI_1" {
 # }
 
 resource "aws_network_interface" "ALB_ENI_2" {
-  # attachment {
-  #   device_index = "0"
-  #   instance     = "i-06fd78260f33107f5"
-  # }
-
-  #interface_type     = "interface"
   ipv4_prefix_count  = "0"
   ipv6_address_count = "0"
   ipv6_prefix_count  = "0"
@@ -405,7 +393,6 @@ resource "aws_subnet" "SUBNET1" {
   enable_resource_name_dns_a_record_on_launch    = "false"
   enable_resource_name_dns_aaaa_record_on_launch = "false"
   ipv6_native                                    = "false"
-  #map_customer_owned_ip_on_launch                = "false"
   map_public_ip_on_launch             = "true"
   private_dns_hostname_type_on_launch = "ip-name"
   vpc_id                              = aws_vpc.VPC_ZFS.id
@@ -423,7 +410,6 @@ resource "aws_subnet" "SUBNET2" {
   enable_resource_name_dns_a_record_on_launch    = "false"
   enable_resource_name_dns_aaaa_record_on_launch = "false"
   ipv6_native                                    = "false"
-  #map_customer_owned_ip_on_launch                = "false"
   map_public_ip_on_launch             = "true"
   private_dns_hostname_type_on_launch = "ip-name"
   vpc_id                              = aws_vpc.VPC_ZFS.id
@@ -441,7 +427,6 @@ resource "aws_subnet" "SUBNET3" {
   enable_resource_name_dns_a_record_on_launch    = "false"
   enable_resource_name_dns_aaaa_record_on_launch = "false"
   ipv6_native                                    = "false"
-  #map_customer_owned_ip_on_launch                = "false"
   map_public_ip_on_launch             = "true"
   private_dns_hostname_type_on_launch = "ip-name"
   vpc_id                              = aws_vpc.VPC_ZFS.id
@@ -459,9 +444,10 @@ resource "aws_vpc" "VPC_ZFS" {
   enable_dns_hostnames             = "true"
   enable_dns_support               = "true"
   instance_tenancy                 = "default"
-  #ipv6_netmask_length              = "0"
 
   tags = {
     Terraform = "Yes"
   }
 }
+
+
