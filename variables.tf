@@ -4,3 +4,8 @@ variable "image_id" {
   description = "The id of the machine image (AMI) to use for the server."
 }
 
+variable "database_password" {
+  type        = string
+  description = "The password to be used to connect to the database"
+}
+
