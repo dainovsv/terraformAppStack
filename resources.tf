@@ -20,19 +20,21 @@ resource "aws_autoscaling_group" "SimpleZFSAutoSaclingGroup" {
   target_group_arns         = [aws_lb_target_group.ALB_ZFS_TARGET_GROUP.arn]
   vpc_zone_identifier       = [aws_subnet.SUBNET1.id,aws_subnet.SUBNET2.id]
   wait_for_capacity_timeout = "10m"
+  
 
 }
 
 
 resource "aws_db_instance" "ZFS_DB" {
   allocated_storage    = 10
-  engine               = "mysql"
+  engine               = "mssql"
   instance_class       = "db.t3.small"
   name                 = "ZFSPOCDB"
   username             = "admin"
   password             = var.database_password
   skip_final_snapshot  = true
-  db_subnet_group_name = aws_db_subnet_group.SUBNET_GROUP_FOR_RDS.id
+  db_subnet_group_name = aws_db_subnet_group.SUBNET_GROUP_FOR_RDS.name
+  vpc_security_group_ids = [aws_security_group.LAUCH_WIZARD_ZFS_DB.id]
 }
 
 
@@ -104,7 +106,7 @@ resource "aws_launch_configuration" "ZFS_LAUNCH_CONFIGURATION" {
     image_id = var.image_id
     instance_type = "t2.small"
     security_groups = [aws_security_group.LAUCH_WIZARD_ZFS.id]
-    key_name = "zfs"
+    key_name = var.keypair_name
     user_data = <<EOF
          <script>
            echo Current date and time >> %SystemRoot%\Temp\test.log
@@ -116,7 +118,7 @@ resource "aws_launch_configuration" "ZFS_LAUNCH_CONFIGURATION" {
 }
 
 resource "aws_db_subnet_group" "SUBNET_GROUP_FOR_RDS" {
-  name       = "ZFS_POC_APP_SUBNETGROUP"
+  name       = "zfssubnetgrouppoc"
   subnet_ids = [aws_subnet.SUBNET1.id, aws_subnet.SUBNET2.id]
 
   tags = {
@@ -384,6 +386,41 @@ resource "aws_security_group" "LAUCH_WIZARD_ZFS" {
     protocol    = "tcp"
     self        = "false"
     to_port     = "8172"
+  }
+
+  name   = "launch-wizard-2"
+  vpc_id = aws_vpc.VPC_ZFS.id
+
+  tags = {
+    Terraform = "Yes"
+  }
+}
+
+resource "aws_security_group" "LAUCH_WIZARD_ZFS_DB" {
+  description = "launch-wizard-2"
+
+  egress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = "0"
+    protocol    = "-1"
+    self        = "false"
+    to_port     = "0"
+  }
+
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = "3389"
+    protocol    = "tcp"
+    self        = "false"
+    to_port     = "3389"
+  }
+
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = "1433"
+    protocol    = "tcp"
+    self        = "false"
+    to_port     = "1433"
   }
 
   name   = "launch-wizard-2"
