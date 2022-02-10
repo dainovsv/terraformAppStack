@@ -32,6 +32,7 @@ resource "aws_db_instance" "ZFS_DB" {
   username             = "admin"
   password             = var.database_password
   skip_final_snapshot  = true
+  db_subnet_group_name = aws_db_subnet_group.SUBNET_GROUP_FOR_RDS.id
 }
 
 
@@ -112,6 +113,15 @@ resource "aws_launch_configuration" "ZFS_LAUNCH_CONFIGURATION" {
            </script>
          <persist>true</persist>
     EOF
+}
+
+resource "aws_db_subnet_group" "SUBNET_GROUP_FOR_RDS" {
+  name       = "ZFS_POC_APP_SUBNETGROUP"
+  subnet_ids = [aws_subnet.SUBNET1.id, aws_subnet.SUBNET2.id]
+
+  tags = {
+    Terraform = "Yes"
+  }
 }
 
 
