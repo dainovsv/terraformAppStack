@@ -52,7 +52,7 @@ resource "aws_launch_configuration" "ZFS_LAUNCH_CONFIGURATION" {
          <script>
            echo Current date and time >> %SystemRoot%\Temp\test.log
            echo %DATE% %TIME% >> %SystemRoot%\Temp\test.log
-           json -I -f %SystemRoot%/../inetpub/wwwroot/ZFSsampleApp/appsettings.json -e "this.ConnectionStrings.DefaultConnection='Server=${aws_db_instance.ZFS_DB.endpoint};Database=aspnet-ZFSWebAppPOC-8A6458F2-6992-47F2-9B57-CE6120E89588;User Id=admin;Password=${var.database_password};'"
+           json -I -f %SystemRoot%/../inetpub/wwwroot/ZFSsampleApp/appsettings.json -e "this.ConnectionStrings.DefaultConnection='Server=${aws_db_instance.ZFS_DB.endpoint};Database=aspnet-ZFSWebAppPOC-8A6458F2-6992-47F2-9B57-CE6120E89588;User Id=admin;Password=ZurichINS;'"
            </script>
          <persist>true</persist>
     EOF
