@@ -13,3 +13,5 @@ variable "keypair_name" {
   description = "You need a premade key pair in your region to use to encrypt the Ec2 instaance passwords"
 }
 
+
+
