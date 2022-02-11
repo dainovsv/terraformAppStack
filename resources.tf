@@ -26,76 +26,17 @@ resource "aws_autoscaling_group" "SimpleZFSAutoSaclingGroup" {
 
 
 resource "aws_db_instance" "ZFS_DB" {
-  allocated_storage    = 10
-  engine               = "mssql"
+  snapshot_identifier = var.snapshot_identifier_id
   instance_class       = "db.t3.small"
-  name                 = "ZFSPOCDB"
-  username             = "admin"
-  password             = var.database_password
-  skip_final_snapshot  = true
+  #allocated_storage    = 30
+  #engine               = "sqlserver-ex"
+  #name                 = "ZFSPOCDB"
+  #username             = "admin"
+  #password             = var.database_password
   db_subnet_group_name = aws_db_subnet_group.SUBNET_GROUP_FOR_RDS.name
   vpc_security_group_ids = [aws_security_group.LAUCH_WIZARD_ZFS_DB.id]
 }
 
-
-# resource "aws_instance" "ZFS_WEB_SERVER" {
-#   ami                         = var.image_id
-#   associate_public_ip_address = "true"
-#   availability_zone           = "eu-west-2a"
-
-#   capacity_reservation_specification {
-#     capacity_reservation_preference = "open"
-#   }
-
-#   cpu_core_count       = "1"
-#   cpu_threads_per_core = "1"
-
-#   credit_specification {
-#     cpu_credits = "standard"
-#   }
-
-#   disable_api_termination = "false"
-#   ebs_optimized           = "false"
-
-#   enclave_options {
-#     enabled = "false"
-#   }
-
-#   get_password_data                    = "false"
-#   hibernation                          = "false"
-#   instance_initiated_shutdown_behavior = "stop"
-#   instance_type                        = "t2.small"
-#   ipv6_address_count                   = "0"
-#   key_name                             = "zfs"
-
-#   launch_template {
-#     #id   = "lt-02c49d0562d1e0649"
-#     name = "ZFSSimpleAppTemplate"
-#   }
-
-#   metadata_options {
-#     http_endpoint               = "enabled"
-#     http_put_response_hop_limit = "1"
-#     http_tokens                 = "optional"cd
-#     instance_metadata_tags      = "disabled"
-#   }
-
-#   monitoring = "false"
-#   private_ip = "172.31.22.43"
-
-#   root_block_device {
-#     delete_on_termination = "true"
-#     encrypted             = "false"
-#     volume_size           = "30"
-#     volume_type           = "gp2"
-#   }
-
-#   security_groups        = ["launch-wizard-2"]
-#   source_dest_check      = "true"
-#   subnet_id              = data.terraform_remote_state.local.outputs.aws_subnet_SUBNET1_id
-#   tenancy                = "default"
-#   vpc_security_group_ids = [aws_security_group.LAUCH_WIZARD_ZFS.id]
-# }
 
 resource "aws_internet_gateway" "IGW_ZFS" {
   vpc_id = aws_vpc.VPC_ZFS.id
